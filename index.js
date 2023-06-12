@@ -19,12 +19,28 @@ app.get("/", (req, res) => {
 
 // create a post
 app.post("/posts/new", async (req, res) => {
-  const { category, breed, price, description } = req.body;
-  const post = await pool.query(
-    "INSERT INTO posts (category, breed, price, description) VALUES ('DOG','PERSIAN','123', 'BOI') RETURNING *"
-  );
-  console.log(post.rows[0]);
-  res.json(post.rows[0])
+  try {
+    const { category, breed, price, description } = req.body;
+    const post = await pool.query(
+      "INSERT INTO posts (category, breed, price, description) VALUES ($1,$2,$3,$4) RETURNING *",
+      [category, breed, price , description]
+    );
+    console.log(post.rows[0]);
+    res.json(post.rows[0]);
+  } catch (error) {
+    console.log(error.message);
+    res.send(error.nessage);
+  }
+});
+
+// get all posts
+app.get("/posts", async (req, res) => {
+  try {
+    const posts = await pool.query("SELECT * FROM posts");
+    res.json(posts.rows);
+  } catch (error) {
+    console.log(error.message);
+  }
 });
 
 app.listen(5000, () => {
