@@ -23,7 +23,7 @@ app.post("/posts/new", async (req, res) => {
     const { category, breed, price, description } = req.body;
     const post = await pool.query(
       "INSERT INTO posts (category, breed, price, description) VALUES ($1,$2,$3,$4) RETURNING *",
-      [category, breed, price , description]
+      [category, breed, price, description]
     );
     console.log(post.rows[0]);
     res.json(post.rows[0]);
@@ -41,6 +41,17 @@ app.get("/posts", async (req, res) => {
   } catch (error) {
     console.log(error.message);
   }
+});
+
+// get a post
+app.get("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
+      id,
+    ]);
+    res.json(post.rows);
+  } catch (error) {}
 });
 
 app.listen(5000, () => {
