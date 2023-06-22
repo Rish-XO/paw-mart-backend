@@ -5,7 +5,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const pool = require("./db");
-const signupRouter = require('./routes/Auth')
+const signupRouter = require("./routes/Auth");
 
 // psql connection
 pool.connect();
@@ -61,14 +61,15 @@ app.put("/posts/:id/edit", async (req, res) => {
   const { category, breed, price, description } = req.body;
   try {
     const editPost = await pool.query(
-      "UPDATE posts SET category = $1, breed = $2, price = $3, description =$4 WHERE post_id = $5 RETURNING *" , [category, breed, price, description, id]
+      "UPDATE posts SET category = $1, breed = $2, price = $3, description =$4 WHERE post_id = $5 RETURNING *",
+      [category, breed, price, description, id]
     );
-    res.json(editPost.rows[o])
+    res.json(editPost.rows[o]);
   } catch (error) {}
 });
 
 //register
-app.use('/signup', signupRouter)
+app.use("/signup", signupRouter);
 
 app.listen(5000, () => {
   console.log("listening on 5000");
