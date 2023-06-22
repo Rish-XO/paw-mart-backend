@@ -5,6 +5,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const pool = require("./db");
+const signupRouter = require('./routes/Auth')
 
 // psql connection
 pool.connect();
@@ -65,6 +66,9 @@ app.put("/posts/:id/edit", async (req, res) => {
     res.json(editPost.rows[o])
   } catch (error) {}
 });
+
+//register
+app.use('/signup', signupRouter)
 
 app.listen(5000, () => {
   console.log("listening on 5000");
