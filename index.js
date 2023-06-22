@@ -68,8 +68,9 @@ app.put("/posts/:id/edit", async (req, res) => {
   } catch (error) {}
 });
 
-//register
-app.use("/signup", signupRouter);
+//register and login
+app.use("/", signupRouter);
+
 
 app.listen(5000, () => {
   console.log("listening on 5000");

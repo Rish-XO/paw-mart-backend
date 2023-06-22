@@ -1,9 +1,10 @@
 const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
+const jwtGenerator = require("../utils/jwtGenerator");
 
 //registering
-router.post("/", async (req, res) => {
+router.post("/signup", async (req, res) => {
   try {
     console.log(req.body);
     const { firstName, lastName, email, password } = req.body;
@@ -23,13 +24,27 @@ router.post("/", async (req, res) => {
 
     //enter the new user to database
     const newUser = await pool.query(
-      "INSERT INTO users (firstName, lastName, email, password , role) VALUES ($1, $2, $3, $4, 'user')",
+      "INSERT INTO users (firstname, lastname, email, password , role) VALUES ($1, $2, $3, $4, 'user') RETURNING *",
       [firstName, lastName, email, hashpwd]
     );
+
+    // jwt token generator
+    const token = jwtGenerator(newUser.rows[0].user_id);
+    res.json({ token });
   } catch (error) {
     console.log(error.message);
     res.status(500).send("server error");
   }
+});
+
+// Login
+router.post("/login", async(req, res) => {
+try {
+    
+} catch (error) {
+    console.log(error.message);
+    res.status(500).send("server error");
+}
 });
 
 module.exports = router;
