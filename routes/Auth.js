@@ -6,7 +6,6 @@ const jwtGenerator = require("../utils/jwtGenerator");
 //registering
 router.post("/signup", async (req, res) => {
   try {
-    console.log(req.body);
     const { firstName, lastName, email, password } = req.body;
 
     // check if the user already exist
@@ -38,13 +37,32 @@ router.post("/signup", async (req, res) => {
 });
 
 // Login
-router.post("/login", async(req, res) => {
-try {
-    
-} catch (error) {
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    if (user.rows.length === 0) {
+      return res.status(401).json("email or password incorrect");
+    }
+
+    const validatePassword = await bcrypt.compare(
+      password,
+      user.rows[0].password
+    );
+
+    if (!validatePassword) {
+      return res.status(401).json("email or password incorrect");
+    }
+
+    const token = jwtGenerator(user.rows[0].user_id);
+    res.json({ token });
+  } catch (error) {
     console.log(error.message);
     res.status(500).send("server error");
-}
+  }
 });
 
 module.exports = router;

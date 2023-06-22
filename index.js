@@ -5,7 +5,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const pool = require("./db");
-const signupRouter = require("./routes/Auth");
+const authRouter = require("./routes/Auth");
 
 // psql connection
 pool.connect();
@@ -69,7 +69,7 @@ app.put("/posts/:id/edit", async (req, res) => {
 });
 
 //register and login
-app.use("/", signupRouter);
+app.use("/", authRouter);
 
 
 app.listen(5000, () => {
