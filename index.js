@@ -9,6 +9,7 @@ const pool = require("./db");
 // psql connection
 pool.connect();
 
+// base middlewares
 app.use(cors());
 app.use(express.json());
 
@@ -29,7 +30,6 @@ app.post("/posts/new", async (req, res) => {
     res.json(post.rows[0]);
   } catch (error) {
     console.log(error.message);
-    res.send(error.nessage);
   }
 });
 
@@ -51,6 +51,18 @@ app.get("/posts/:id", async (req, res) => {
       id,
     ]);
     res.json(post.rows[0]);
+  } catch (error) {}
+});
+
+// update a post
+app.put("/posts/:id/edit", async (req, res) => {
+  const { id } = req.params;
+  const { category, breed, price, description } = req.body;
+  try {
+    const editPost = await pool.query(
+      "UPDATE posts SET category = $1, breed = $2, price = $3, description =$4 WHERE post_id = $5 RETURNING *" , [category, breed, price, description, id]
+    );
+    res.json(editPost.rows[o])
   } catch (error) {}
 });
 
