@@ -6,7 +6,7 @@ const app = express();
 const cors = require("cors");
 const pool = require("./db");
 const authRouter = require("./routes/Auth");
-
+const authorization = require('./middleware/authorization')
 // psql connection
 pool.connect();
 
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 });
 
 // create a post
-app.post("/posts/new", async (req, res) => {
+app.post("/posts/new",authorization, async (req, res) => {
   try {
     const { category, breed, price, description } = req.body;
     const post = await pool.query(
