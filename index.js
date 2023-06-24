@@ -45,7 +45,7 @@ app.get("/posts", async (req, res) => {
 });
 
 // get a post
-app.get("/posts/:id", async (req, res) => {
+app.get("/posts/:id", authorization, async (req, res) => {
   const { id } = req.params;
   try {
     const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
