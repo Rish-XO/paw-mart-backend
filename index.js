@@ -44,7 +44,7 @@ app.get("/posts", async (req, res) => {
   }
 });
 
-// get a post
+// get a post, remember to check middlewares issues in future
 app.get("/posts/:id", authorization, async (req, res) => {
   const { id } = req.params;
   try {
