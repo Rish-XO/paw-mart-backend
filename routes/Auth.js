@@ -29,7 +29,7 @@ router.post("/signup", async (req, res) => {
 
     // jwt token generator
     const token = jwtGenerator(newUser.rows[0].user_id);
-    res.json({ token });
+    res.json({ token , role: 'user'});
   } catch (error) {
     console.log(error.message);
     res.status(500).send("server error");
