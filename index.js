@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
   res.send("yoyy");
 });
 
-// create a post
+// create a post remember to check middlewares issues in future
 app.post("/posts/new",authorization, async (req, res) => {
   try {
     const { category, breed, price, description } = req.body;
@@ -44,8 +44,8 @@ app.get("/posts", async (req, res) => {
   }
 });
 
-// get a post, remember to check middlewares issues in future
-app.get("/posts/:id", authorization, async (req, res) => {
+// get a post, 
+app.get("/posts/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
