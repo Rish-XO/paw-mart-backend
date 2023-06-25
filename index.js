@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
   res.send("yoyy");
 });
 
-// create a post remember to check middlewares issues in future
+// create a post, remember to check middlewares issues in future
 app.post("/posts/new", async (req, res) => {
   try {
     const { category, breed, price, description } = req.body;
