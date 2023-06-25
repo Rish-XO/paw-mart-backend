@@ -69,7 +69,7 @@ router.post("/login", async (req, res) => {
 });
 
 // verify
-router.get('/is-verify' ,authorization, (req, res) => {
+router.post('/is-verify' ,authorization, (req, res) => {
     try {
         res.json(true)
     } catch (error) {
