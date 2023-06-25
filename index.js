@@ -20,9 +20,8 @@ app.get("/", (req, res) => {
 });
 
 // create a post remember to check middlewares issues in future
-app.post("/posts/new",authorization, async (req, res) => {
+app.post("/posts/new", async (req, res) => {
   try {
-    console.log(req.user)
     const { category, breed, price, description } = req.body;
     const post = await pool.query(
       "INSERT INTO posts (category, breed, price, description) VALUES ($1,$2,$3,$4) RETURNING *",

@@ -46,10 +46,12 @@ router.post("/login", async (req, res) => {
     const user = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
-
+    
     if (user.rows.length === 0) {
-      return res.status(401).json("email or password incorrect");
+        return res.status(401).json("email or password incorrect");
     }
+    const id = user.rows[0].user_id
+    console.log(id);
 
     const validatePassword = await bcrypt.compare(
       password,
@@ -61,7 +63,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = await jwtGenerator(user.rows[0].user_id);
-    res.json({ token , role: 'user'});
+    res.json({ token , role: 'user',id});
   } catch (error) {
     console.log(error.message);
     res.status(500).send("server error");
@@ -71,7 +73,7 @@ router.post("/login", async (req, res) => {
 // verify
 router.post('/is-verify' ,authorization, (req, res) => {
     try {
-        res.json(true)
+        res.json({status: true, id: req.user})
     } catch (error) {
         console.log(error.message);
         res.status(500).send("server error");
