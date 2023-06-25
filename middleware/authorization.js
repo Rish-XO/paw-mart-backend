@@ -3,7 +3,7 @@ require("dotenv").config();
 
 module.exports = async (req, res, next) => {
   const jwtToken = req.header("token");
-  const payload = jwt.verify(jwtToken, process.env.secret);
+  const payload = await jwt.verify(jwtToken, process.env.secret);
   req.user = payload.user;
   next();
   if (!jwtToken) {
