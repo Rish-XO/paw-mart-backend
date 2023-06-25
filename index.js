@@ -6,7 +6,7 @@ const app = express();
 const cors = require("cors");
 const pool = require("./db");
 const authRouter = require("./routes/Auth");
-const authorization = require('./middleware/authorization')
+const authorization = require("./middleware/authorization");
 // psql connection
 pool.connect();
 
@@ -22,10 +22,10 @@ app.get("/", (req, res) => {
 // create a post,, remember to check middlewares issues in future
 app.post("/posts/new", async (req, res) => {
   try {
-    const { category, breed, price, description, id } = req.body;
+    const { category, breed, price, description, user_id } = req.body;
     const post = await pool.query(
-      "INSERT INTO posts (category, breed, price, description) VALUES ($1,$2,$3,$4) RETURNING *",
-      [category, breed, price, description]
+      "INSERT INTO posts (category, breed, price, description, user_id) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      [category, breed, price, description, user_id]
     );
     console.log(post.rows[0]);
     res.json(post.rows[0]);
@@ -44,7 +44,7 @@ app.get("/posts", async (req, res) => {
   }
 });
 
-// get a post, 
+// get a post,
 app.get("/posts/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -70,7 +70,6 @@ app.put("/posts/:id/edit", async (req, res) => {
 
 //register and login
 app.use("/", authRouter);
-
 
 app.listen(5000, () => {
   console.log("listening on 5000");
