@@ -7,6 +7,10 @@ const cors = require("cors");
 const pool = require("./db");
 const authRouter = require("./routes/Auth");
 const authorization = require("./middleware/authorization");
+const multer = require("multer");
+const AWS = require('aws-sdk')
+const multerS3 = require('multer-s3');
+
 // psql connection
 pool.connect();
 
@@ -15,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // home page
-app.get("/", (req, res) => {
+app.get("/", (req, res) => { 
   res.send("yoyy");
 });
 
@@ -70,6 +74,36 @@ app.put("/posts/:id/edit", async (req, res) => {
 
 //register and login
 app.use("/", authRouter);
+
+// aws upload
+const region = "eu-north-1";
+const bucketName = "pawmartbucket";
+const accessKeyId = process.env.AWS_ACCESSKEY;
+const secretAccessKey = process.env.AWS_SECRET_ACCESSKEY;
+const baseURL = process.env.BUCKET_STORAGE_URL
+
+const s3 = new AWS.S3({
+  accessKeyId,
+  secretAccessKey,
+  region,
+});
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: bucketName,
+    key: function (req, file, cb) {
+      // Generate a unique key for each uploaded file
+      const uniqueKey = `${Date.now()}_${file.originalname}`;
+      cb(null, `pawmart-images/${uniqueKey}`); // Specify the path in your bucket
+    },
+  }),
+  limits: { fileSize: 52428800 }, // 50MB file size limit
+});
+
+app.post('/uploadimages',(req, res) => {
+  
+})
 
 app.listen(5000, () => {
   console.log("listening on 5000");
