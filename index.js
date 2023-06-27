@@ -86,7 +86,11 @@ const s3 = new AWS.S3({
   accessKeyId,
   secretAccessKey,
   region,
+  signatureVersion: 'v4'
+
+  // apiVersion: '2006-03-01', // Specify the desired S3 API version
 });
+
 
 const upload = multer({
   storage: multerS3({
@@ -101,8 +105,16 @@ const upload = multer({
   limits: { fileSize: 52428800 }, // 50MB file size limit
 });
 
-app.post('/uploadimages',(req, res) => {
+app.post('/uploadimages',upload.array('image'),(req, res) => {
+
+try {
+  const imageUrls = req.files.map((file) => file.location);
+ console.log(imageUrls);
+  res.json({imageUrls:imageUrls})
+} catch (error) {
   
+}
+
 })
 
 app.listen(5000, () => {
