@@ -26,8 +26,7 @@ app.get("/", (req, res) => {
 // create a post,, remember to check middlewares issues in future
 app.post("/posts/new", async (req, res) => {
   try {
-    const { category, breed, price, description, user_id, imageURL } =
-      req.body;
+    const { category, breed, price, description, user_id, imageURL } = req.body;
     console.log("urls from frontend", imageURL);
     const post = await pool.query(
       "INSERT INTO posts (category, breed, price, description, user_id) VALUES ($1,$2,$3,$4,$5) RETURNING *",
