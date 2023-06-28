@@ -26,21 +26,33 @@ app.get("/", (req, res) => {
 // create a post,, remember to check middlewares issues in future
 app.post("/posts/new", async (req, res) => {
   try {
-    const { category, breed, price, description, user_id, imageUrlsFromServer } = req.body;
+    const {
+      category,
+      breed,
+      price,
+      description,
+      user_id,
+      imageUrlsFromServer,
+    } = req.body;
     console.log("urls from frontend", imageUrlsFromServer);
     const post = await pool.query(
       "INSERT INTO posts (category, breed, price, description, user_id) VALUES ($1,$2,$3,$4,$5) RETURNING *",
       [category, breed, price, description, user_id]
     );
     console.log(post.rows[0]);
-    const post_id = post.rows[0].post_id
+    const post_id = post.rows[0].post_id;
 
     // putting urls in image table
-    const imageInserted = imageUrlsFromServer.map(async (url) =>{
-      const postImage = await pool.query("INSERT INTO image (url, post_id) VALUES ($1,$2) RETURNING *",[url,post_id])
+    const insertImagePromises = imageUrlsFromServer.map(async (url) => {
+      const postImage = await pool.query(
+        "INSERT INTO image (url, post_id) VALUES ($1,$2) RETURNING *",
+        [url, post_id]
+      );
       console.log("inseted images", postImage.rows[0]);
-      return postImage.rows[0]
-    })
+      return postImage.rows[0];
+    });
+
+    const insertedImages = await Promise.all(insertImagePromises);
 
     res.json(post.rows[0]);
   } catch (error) {
@@ -65,7 +77,11 @@ app.get("/posts/:id", async (req, res) => {
     const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
       id,
     ]);
-    res.json(post.rows[0]);
+    const images = await pool.query("SELECT url FROM image WHERE post_id = $1", [
+      id,
+    ]);
+    console.log("urls from tableeee", images.rows);
+    res.json({post:post.rows[0], urls:images.rows});
   } catch (error) {}
 });
 
