@@ -26,9 +26,9 @@ app.get("/", (req, res) => {
 // create a post,, remember to check middlewares issues in future
 app.post("/posts/new", async (req, res) => {
   try {
-    const { category, breed, price, description, user_id, imageUrls } =
+    const { category, breed, price, description, user_id, imageURL } =
       req.body;
-    console.log("urls from frontend", imageUrls);
+    console.log("urls from frontend", imageURL);
     const post = await pool.query(
       "INSERT INTO posts (category, breed, price, description, user_id) VALUES ($1,$2,$3,$4,$5) RETURNING *",
       [category, breed, price, description, user_id]
@@ -100,7 +100,7 @@ const upload = multer({
     key: function (req, file, cb) {
       // Generate a unique key for each uploaded file
       const uniqueKey = `${Date.now()}_${file.originalname}`;
-      cb(null, `pawmart-images/${uniqueKey}`); // Specify the path in your bucket
+      cb(null, `${uniqueKey}`); // Specify the path in your bucket
     },
   }),
   limits: { fileSize: 52428800 }, // 50MB file size limit
