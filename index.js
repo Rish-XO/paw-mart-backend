@@ -8,8 +8,8 @@ const pool = require("./db");
 const authRouter = require("./routes/Auth");
 const authorization = require("./middleware/authorization");
 const multer = require("multer");
-const AWS = require('aws-sdk')
-const multerS3 = require('multer-s3');
+const AWS = require("aws-sdk");
+const multerS3 = require("multer-s3");
 
 // psql connection
 pool.connect();
@@ -19,14 +19,16 @@ app.use(cors());
 app.use(express.json());
 
 // home page
-app.get("/", (req, res) => { 
+app.get("/", (req, res) => {
   res.send("yoyy");
 });
 
 // create a post,, remember to check middlewares issues in future
 app.post("/posts/new", async (req, res) => {
   try {
-    const { category, breed, price, description, user_id } = req.body;
+    const { category, breed, price, description, user_id, imageUrls } =
+      req.body;
+    console.log("urls from frontend", imageUrls);
     const post = await pool.query(
       "INSERT INTO posts (category, breed, price, description, user_id) VALUES ($1,$2,$3,$4,$5) RETURNING *",
       [category, breed, price, description, user_id]
@@ -80,17 +82,16 @@ const region = "eu-north-1";
 const bucketName = "pawmartbucket";
 const accessKeyId = process.env.AWS_ACCESSKEY;
 const secretAccessKey = process.env.AWS_SECRET_ACCESSKEY;
-const baseURL = process.env.BUCKET_STORAGE_URL
+const baseURL = process.env.BUCKET_STORAGE_URL;
 
 const s3 = new AWS.S3({
   accessKeyId,
   secretAccessKey,
   region,
-  signatureVersion: 'v4'
+  signatureVersion: "v4",
 
   // apiVersion: '2006-03-01', // Specify the desired S3 API version
 });
-
 
 const upload = multer({
   storage: multerS3({
@@ -105,17 +106,13 @@ const upload = multer({
   limits: { fileSize: 52428800 }, // 50MB file size limit
 });
 
-app.post('/uploadimages',upload.array('image'),(req, res) => {
-
-try {
-  const imageUrls = req.files.map((file) => file.location);
- console.log(imageUrls);
-  res.json({imageUrls:imageUrls})
-} catch (error) {
-  
-}
-
-})
+app.post("/uploadimages", upload.array("image"), (req, res) => {
+  try {
+    const imageUrls = req.files.map((file) => file.location);
+    console.log(imageUrls);
+    res.json({ imageUrls: imageUrls });
+  } catch (error) {}
+});
 
 app.listen(5000, () => {
   console.log("listening on 5000");
