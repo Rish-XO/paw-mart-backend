@@ -79,7 +79,7 @@ app.get("/posts", async (req, res) => {
         first_url: row.first_url || null // Set null if first_url is undefined
       };
     });
-    console.log(posts);
+    // console.log(posts);
     res.json(posts);
   } catch (error) {
     console.log(error.message);
