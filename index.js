@@ -63,13 +63,29 @@ app.post("/posts/new", async (req, res) => {
 // get all posts
 app.get("/posts", async (req, res) => {
   try {
-    const posts = await pool.query("SELECT * FROM posts");
-    console.log(posts.rows);
-    res.json(posts.rows);
+    const query = `
+      SELECT posts.*, image.url AS first_url
+      FROM posts
+      LEFT JOIN (
+        SELECT DISTINCT ON (post_id) *
+        FROM image
+        ORDER BY post_id, image_id
+      ) AS image ON posts.post_id = image.post_id
+    `;
+    const result = await pool.query(query);
+    const posts = result.rows.map((row) => {
+      return {
+        ...row,
+        first_url: row.first_url || null // Set null if first_url is undefined
+      };
+    });
+    console.log(posts);
+    res.json(posts);
   } catch (error) {
     console.log(error.message);
   }
 });
+
 
 // get a post,
 app.get("/posts/:id", async (req, res) => {
