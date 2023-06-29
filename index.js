@@ -94,7 +94,7 @@ app.get("/posts/:id", async (req, res) => {
     const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
       id,
     ]);
-    const images = await pool.query("SELECT url FROM image WHERE post_id = $1", [
+    const images = await pool.query("SELECT * FROM image WHERE post_id = $1", [
       id,
     ]);
     // console.log("urls from tableeee", images.rows);
