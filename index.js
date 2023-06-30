@@ -118,11 +118,14 @@ app.put("/posts/:id/edit", async (req, res) => {
 
     //delete image urls from table
   const existingImages = imageUrls.map((id) => id.image_id)
-  // console.log("existing images", existingImages );
-  await pool.query("DELETE FROM image WHERE post_id = $1 AND image_id NOT IN ($2:csv)", [id,existingImages])
 
+  //creating custom placeholder for existingImages for query
+  const placeholders = existingImages.map((_,index) => `$${index + 2}`).join(", ")
 
-    res.json(editPost.rows[o]);
+  // console.log("existing images", existingImages, placeholders );
+  await pool.query(`DELETE FROM image WHERE post_id = $1 AND image_id NOT IN (${placeholders})`, [id, ...existingImages])
+
+    res.json(editPost.rows[0]);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "An error occurred while updating the post." });
