@@ -99,20 +99,34 @@ app.get("/posts/:id", async (req, res) => {
     ]);
     // console.log("urls from tableeee", images.rows);
     res.json({post:post.rows[0], urls:images.rows});
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+  }
 });
 
 // update a post
 app.put("/posts/:id/edit", async (req, res) => {
   const { id } = req.params;
   const { category, breed, price, description } = req.body;
+  const { imageUrls } = req.body
+  console.log("images from frontend",imageUrls);
   try {
     const editPost = await pool.query(
       "UPDATE posts SET category = $1, breed = $2, price = $3, description =$4 WHERE post_id = $5 RETURNING *",
       [category, breed, price, description, id]
     );
+
+    //delete image urls from table
+  const existingImages = imageUrls.map((id) => id.image_id)
+  // console.log("existing images", existingImages );
+  await pool.query("DELETE FROM image WHERE post_id = $1 AND image_id NOT IN ($2:csv)", [id,existingImages])
+
+
     res.json(editPost.rows[o]);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "An error occurred while updating the post." });
+  }
 });
 
 //register and login
@@ -152,7 +166,9 @@ app.post("/uploadimages", upload.array("image"), (req, res) => {
     const imageUrls = req.files.map((file) => file.location);
     // console.log(imageUrls);
     res.json({ imageUrls: imageUrls });
-  } catch (error) {}
+  } catch (error) {
+
+  }
 });
 
 app.listen(5000, () => {
