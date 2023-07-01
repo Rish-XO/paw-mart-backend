@@ -30,7 +30,7 @@ app.post("/posts/new", async (req, res) => {
       category,
       breed,
       price,
-      description,
+      description, 
       user_id,
       imageUrlsFromServer,
     } = req.body;
