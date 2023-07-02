@@ -30,7 +30,7 @@ app.post("/posts/new", async (req, res) => {
       category,
       breed,
       price,
-      description, 
+      description,
       user_id,
       imageUrlsFromServer,
     } = req.body;
@@ -76,7 +76,7 @@ app.get("/posts", async (req, res) => {
     const posts = result.rows.map((row) => {
       return {
         ...row,
-        first_url: row.first_url || null // Set null if first_url is undefined
+        first_url: row.first_url || null, // Set null if first_url is undefined
       };
     });
     // console.log(posts);
@@ -85,7 +85,6 @@ app.get("/posts", async (req, res) => {
     console.log(error.message);
   }
 });
-
 
 // get a post,
 app.get("/posts/:id", async (req, res) => {
@@ -98,7 +97,7 @@ app.get("/posts/:id", async (req, res) => {
       id,
     ]);
     // console.log("urls from tableeee", images.rows);
-    res.json({post:post.rows[0], urls:images.rows});
+    res.json({ post: post.rows[0], urls: images.rows });
   } catch (error) {
     console.log(error.message);
   }
@@ -108,8 +107,9 @@ app.get("/posts/:id", async (req, res) => {
 app.put("/posts/:id/edit", async (req, res) => {
   const { id } = req.params;
   const { category, breed, price, description } = req.body;
-  const { imageUrls } = req.body
-  console.log("images from frontend",imageUrls);
+  const { imageUrls } = req.body;
+  const { imageUrlsFromServer } = req.body;
+  console.log("images from frontend", imageUrls);
   try {
     const editPost = await pool.query(
       "UPDATE posts SET category = $1, breed = $2, price = $3, description =$4 WHERE post_id = $5 RETURNING *",
@@ -117,18 +117,42 @@ app.put("/posts/:id/edit", async (req, res) => {
     );
 
     //delete image urls from table
-  const existingImages = imageUrls.map((id) => id.image_id)
+    if (imageUrls && imageUrls.length > 0) {
+      const existingImages = imageUrls.map((id) => id.image_id);
 
-  //creating custom placeholder for existingImages for query
-  const placeholders = existingImages.map((_,index) => `$${index + 2}`).join(", ")
+      //creating custom placeholder for existingImages for query
+      const placeholders = existingImages.map((_, index) => `$${index + 2}`);
 
-  // console.log("existing images", existingImages, placeholders );
-  await pool.query(`DELETE FROM image WHERE post_id = $1 AND image_id NOT IN (${placeholders})`, [id, ...existingImages])
+      const placeholdersString = placeholders.join(", ");
 
+      // console.log("existing images", existingImages, placeholders );
+      await pool.query(
+        `DELETE FROM image WHERE post_id = $1 AND image_id NOT IN (${placeholdersString})`,
+        [id, ...existingImages]
+      );
+    }
+
+    if(imageUrls && imageUrls.length === 0 ){
+      await pool.query('DELETE FROM image WHERE post_id = $1', [id])
+    }
+
+    // saving new image uploads
+    if (imageUrlsFromServer) {
+      const insertImagePromises = imageUrlsFromServer.map(async (url) => {
+        const postImage = await pool.query(
+          "INSERT INTO image (url, post_id) VALUES ($1,$2) RETURNING *",
+          [url, id]
+        );
+        return postImage.rows[0];
+      });
+      const insertedImages = await Promise.all(insertImagePromises);
+    }
     res.json(editPost.rows[0]);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ error: "An error occurred while updating the post." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating the post." });
   }
 });
 
@@ -167,11 +191,9 @@ const upload = multer({
 app.post("/uploadimages", upload.array("image"), (req, res) => {
   try {
     const imageUrls = req.files.map((file) => file.location);
-    // console.log(imageUrls);
+    console.log(imageUrls);
     res.json({ imageUrls: imageUrls });
-  } catch (error) {
-
-  }
+  } catch (error) {}
 });
 
 app.listen(5000, () => {
