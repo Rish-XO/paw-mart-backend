@@ -132,8 +132,8 @@ app.put("/posts/:id/edit", async (req, res) => {
       );
     }
 
-    if(imageUrls && imageUrls.length === 0 ){
-      await pool.query('DELETE FROM image WHERE post_id = $1', [id])
+    if (imageUrls && imageUrls.length === 0) {
+      await pool.query("DELETE FROM image WHERE post_id = $1", [id]);
     }
 
     // saving new image uploads
