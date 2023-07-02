@@ -96,8 +96,10 @@ app.get("/posts/:id", async (req, res) => {
     const images = await pool.query("SELECT * FROM image WHERE post_id = $1", [
       id,
     ]);
+    const  user_id = post.rows[0].user_id
+    const owner = await pool.query('SELECT firstname, lastname FROM users WHERE user_id = $1',[user_id])
     // console.log("urls from tableeee", images.rows);
-    res.json({ post: post.rows[0], urls: images.rows });
+    res.json({ post: post.rows[0], urls: images.rows, owner: owner.rows[0] });
   } catch (error) {
     console.log(error.message);
   }
