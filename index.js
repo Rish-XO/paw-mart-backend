@@ -93,7 +93,7 @@ app.get("/posts/:id", async (req, res) => {
     const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
       id,
     ]);
-    const images = await pool.query("SELECT * FROM image WHERE post_id = $1", [
+    const images = await pool.query("SELECT * FROM image WHERE post_id = $1 ORDER BY image_id ASC", [
       id,
     ]);
     const  user_id = post.rows[0].user_id
