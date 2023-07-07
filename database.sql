@@ -2,6 +2,7 @@
 
 CREATE TABLE public.posts
 (
+ 
 )
 ;
 
