@@ -10,6 +10,16 @@ const authorization = require("./middleware/authorization");
 const multer = require("multer");
 const AWS = require("aws-sdk");
 const multerS3 = require("multer-s3");
+const { Socket } = require("socket.io");
+
+const io =require('socket.io')(3001,{
+  cors:{
+    origin:"*",
+    methods: ["GET", "POST"],
+    transports: ['websocket', 'polling'],
+    credentials: true
+  },
+})
 
 // psql connection
 pool.connect();
@@ -197,6 +207,18 @@ app.post("/uploadimages", upload.array("image"), (req, res) => {
     res.json({ imageUrls: imageUrls });
   } catch (error) {}
 });
+
+// chat 
+io.on('connection', socket => {
+
+  // joining a room
+  // socket.on("joinRoom")
+
+  socket.on('chatMessage',(message) => {
+    console.log(message);
+  })
+  
+} )
 
 app.listen(5000, () => {
   console.log("listening on 5000");
