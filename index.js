@@ -212,12 +212,18 @@ app.post("/uploadimages", upload.array("image"), (req, res) => {
 io.on('connection', socket => {
 
   // joining a room
-  // socket.on("joinRoom")
+  socket.on("joinRoom", (data)=> {
+    console.log(data);
+  })
 
   socket.on('chatMessage',(message) => {
     console.log(message);
+    socket.emit("chatMessage", message)
   })
   
+  socket.on("disconnect", ()=>{
+    console.log("socket Closed :::::::::::");
+  })
 } )
 
 app.listen(5000, () => {
