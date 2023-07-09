@@ -208,6 +208,16 @@ app.post("/uploadimages", upload.array("image"), (req, res) => {
   } catch (error) {}
 });
 
+// chat endpoints
+app.post("/roomId", async(req, res) => {
+  try {
+    const {ownerID, user_id, post_id } = req.body
+    
+  } catch (error) {
+    console.log(error.message);
+  }
+})
+
 // chat 
 io.on('connection', socket => {
 
