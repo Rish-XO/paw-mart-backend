@@ -296,7 +296,7 @@ app.get("/getAllChats", async (req, res) => {
   `);
 
     // WHERE rooms.last_message IS NOT NULL
-    console.log(chatRooms.rows);
+    // console.log(chatRooms.rows);
     res.status(200).json(chatRooms.rows);
   } catch (error) {
     console.log(error.message);
