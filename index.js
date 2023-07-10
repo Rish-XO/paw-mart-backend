@@ -12,14 +12,14 @@ const AWS = require("aws-sdk");
 const multerS3 = require("multer-s3");
 const { Socket } = require("socket.io");
 
-const io =require('socket.io')(3001,{
-  cors:{
-    origin:"*",
+const io = require("socket.io")(3001, {
+  cors: {
+    origin: "*",
     methods: ["GET", "POST"],
-    transports: ['websocket', 'polling'],
-    credentials: true
+    transports: ["websocket", "polling"],
+    credentials: true,
   },
-})
+});
 
 // psql connection
 pool.connect();
@@ -103,11 +103,15 @@ app.get("/posts/:id", async (req, res) => {
     const post = await pool.query("SELECT * FROM posts WHERE post_id = $1", [
       id,
     ]);
-    const images = await pool.query("SELECT * FROM image WHERE post_id = $1 ORDER BY image_id ASC", [
-      id,
-    ]);
-    const  user_id = post.rows[0].user_id
-    const owner = await pool.query('SELECT firstname, lastname FROM users WHERE user_id = $1',[user_id])
+    const images = await pool.query(
+      "SELECT * FROM image WHERE post_id = $1 ORDER BY image_id ASC",
+      [id]
+    );
+    const user_id = post.rows[0].user_id;
+    const owner = await pool.query(
+      "SELECT firstname, lastname FROM users WHERE user_id = $1",
+      [user_id]
+    );
     // console.log("urls from tableeee", images.rows);
     res.json({ post: post.rows[0], urls: images.rows, owner: owner.rows[0] });
   } catch (error) {
@@ -209,32 +213,67 @@ app.post("/uploadimages", upload.array("image"), (req, res) => {
 });
 
 // chat endpoints
-app.post("/roomId", async(req, res) => {
+
+// Express route for creating a room
+app.post("/roomId", async (req, res) => {
+  const { ownerID, user_id, post_id } = req.body;
+
   try {
-    const {ownerID, user_id, post_id } = req.body
-    
+    // Check if a matching room already exists
+    const existingRoomQuery = await pool.query(
+      "SELECT room_id FROM roommembers WHERE user_id IN ($1, $2) AND EXISTS (SELECT 1 FROM rooms WHERE post_id = $3 AND rooms.room_id = roommembers.room_id)",
+      [ownerID, user_id, post_id]
+    );
+
+    if (existingRoomQuery.rows.length > 0) {
+      // Return the existing room ID
+      const roomID = existingRoomQuery.rows[0].room_id;
+      return res.status(200).json({ roomID });
+    }
+
+    // Create a new row in the room table if room doesn't exist
+    const roomQuery = await pool.query(
+      "INSERT INTO rooms (post_id) VALUES ($1) RETURNING *",
+      [post_id]
+    );
+
+    const roomID = roomQuery.rows[0].room_id;
+
+    // Save ownerID and user_id in the roommembers table
+    await pool.query(
+      "INSERT INTO roommembers (room_id, user_id) VALUES ($1, $2)",
+      [roomID, ownerID]
+    );
+    await pool.query(
+      "INSERT INTO roommembers (room_id, user_id) VALUES ($1, $2)",
+      [roomID, user_id]
+    );
+
+    res.status(200).json({ roomID });
   } catch (error) {
     console.log(error.message);
+    res
+      .status(500)
+      .json({ error: "An error occurred while creating the room." });
   }
-})
+});
 
-// chat 
-io.on('connection', socket => {
-
+// chat
+io.on("connection", (socket) => {
   // joining a room
-  socket.on("joinRoom", (data)=> {
+  socket.on("joinRoom", (data) => {
     console.log(data);
-  })
+  });
 
-  socket.on('chatMessage',(message) => {
+  socket.on("chatMessage", (message) => {
     console.log(message);
-    socket.emit("chatMessage", message)
-  })
-  
-  socket.on("disconnect", ()=>{
+    socket.emit("chatMessage", message);
+  });
+
+  socket.on("disconnect", () => {
     console.log("socket Closed :::::::::::");
-  })
-} )
+  });
+});
 
 app.listen(5000, () => {
   console.log("listening on 5000");
