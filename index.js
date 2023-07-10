@@ -258,16 +258,72 @@ app.post("/roomId", async (req, res) => {
   }
 });
 
+// get all chats
+app.get("/getAllChats", async (req, res) => {
+  try {
+    const chatRooms = await pool.query(`
+    SELECT DISTINCT ON (rooms.room_id)
+           rooms.*, 
+           posts.*, 
+           users1.user_id AS user1_id,
+           users1.firstname AS user1_firstname,
+           users1.lastname AS user1_lastname,
+           users2.user_id AS user2_id,
+           users2.firstname AS user2_firstname,
+           users2.lastname AS user2_lastname,
+           image.url
+    FROM rooms
+    JOIN posts ON rooms.post_id = posts.post_id
+    JOIN roommembers rm1 ON rooms.room_id = rm1.room_id
+    JOIN users users1 ON rm1.user_id = users1.user_id
+    JOIN roommembers rm2 ON rooms.room_id = rm2.room_id AND rm1.user_id <> rm2.user_id
+    JOIN users users2 ON rm2.user_id = users2.user_id
+    JOIN (
+      SELECT post_id, MIN(url) AS url
+      FROM image
+      GROUP BY post_id
+    ) image ON rooms.post_id = image.post_id
+   
+    GROUP BY rooms.room_id, 
+             posts.post_id, 
+             users1.user_id,
+             users1.firstname,
+             users1.lastname,
+             users2.user_id,
+             users2.firstname,
+             users2.lastname,
+             image.url
+  `);
+
+    // WHERE rooms.last_message IS NOT NULL
+    console.log(chatRooms.rows);
+    res.status(200).json(chatRooms.rows);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "server issue, try again" });
+  }
+});
+
+//get a chat
+app.get("/getChatDetails/:roomID", async (req, res) => {
+  const roomID = req.params.roomID;
+  const chatRooms = await pool.query(
+    "SELECT * FROM rooms WHERE last_message IS NOT NULL"
+  );
+  console.log(chatRooms.rows);
+  res.status(200).json({ roomID });
+});
+
 // chat
 io.on("connection", (socket) => {
   // joining a room
-  socket.on("joinRoom", (data) => {
-    console.log(data);
+  socket.on("joinRoom", ({ roomID }) => {
+    socket.join(roomID);
   });
 
-  socket.on("chatMessage", (message) => {
-    console.log(message);
-    socket.emit("chatMessage", message);
+  socket.on("chatMessage", ({ roomID, message }) => {
+    console.log(roomID, message);
+    io.to(roomID).emit("chatMessage", message);
   });
 
   socket.on("disconnect", () => {
