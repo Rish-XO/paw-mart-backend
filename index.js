@@ -315,31 +315,34 @@ app.get("/getChatDetails/:roomID", async (req, res) => {
 });
 
 // chat
-let currentRoom = null
+let currentRoom = null;
 io.on("connection", (socket) => {
   // joining a room
   socket.on("joinRoom", ({ roomID }) => {
-    if(currentRoom){
-      socket.leave(currentRoom)
+    if (currentRoom) {
+      socket.leave(currentRoom);
       console.log("leaving the room");
     }
     socket.join(roomID);
     console.log("joining a room");
-    currentRoom = roomID
+    currentRoom = roomID;
     console.log("the current room", currentRoom);
+    const clients = io.sockets.adapter.rooms.get(roomID);
+    console.log(clients, "cccccccccccccccccccccccccccccc");
+   
   });
 
   socket.on("chatMessage", ({ roomID, message }) => {
-    console.log(roomID, message);
+    console.log(roomID, message, "*****************************s");
     io.to(roomID).emit("chatMessage", message);
   });
 
   socket.on("disconnect", () => {
-    if(currentRoom){
-      socket.leave(currentRoom)
+    if (currentRoom) {
+      socket.leave(currentRoom);
     }
     console.log("socket Closed :::::::::::");
-    currentRoom = null
+    currentRoom = null;
   });
 });
 
