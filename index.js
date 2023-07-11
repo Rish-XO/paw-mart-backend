@@ -315,10 +315,18 @@ app.get("/getChatDetails/:roomID", async (req, res) => {
 });
 
 // chat
+let currentRoom = null
 io.on("connection", (socket) => {
   // joining a room
   socket.on("joinRoom", ({ roomID }) => {
+    if(currentRoom){
+      socket.leave(currentRoom)
+      console.log("leaving the room");
+    }
     socket.join(roomID);
+    console.log("joining a room");
+    currentRoom = roomID
+    console.log("the current room", currentRoom);
   });
 
   socket.on("chatMessage", ({ roomID, message }) => {
@@ -327,7 +335,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    if(currentRoom){
+      socket.leave(currentRoom)
+    }
     console.log("socket Closed :::::::::::");
+    currentRoom = null
   });
 });
 
