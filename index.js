@@ -258,6 +258,20 @@ app.post("/roomId", async (req, res) => {
   }
 });
 
+//save a message
+app.post("/saveMessage", async (req, res) => {
+  const { content, userID, roomID, time } = req.body;
+  try {
+    await pool.query(
+      "INSERT INTO messages (room_id, user_id,content, created_at) VALUES ($1,$2,$3,$4)",
+      [roomID, userID, content, time]
+    );
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "An error occured while sending message" });
+  }
+});
+
 // get all chats
 app.get("/getAllChats", async (req, res) => {
   try {
