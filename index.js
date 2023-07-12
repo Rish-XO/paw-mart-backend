@@ -260,17 +260,17 @@ app.post("/roomId", async (req, res) => {
 
 //save a message
 app.post("/saveMessage", async (req, res) => {
-  const { content, userID, roomID, time } = req.body;
+  const { content, user_id, room_id, created_at } = req.body;
   try {
     // saving the message to table
     await pool.query(
       "INSERT INTO messages (room_id, user_id, content, created_at) VALUES ($1,$2,$3,$4)",
-      [roomID, userID, content, time]
+      [room_id, user_id, content, created_at]
     );
     
     // updating the lst msg in room table
-    await pool.query("UPDATE rooms SET last_message = $1 WHERE room_id = $2", [content, roomID])
-    // console.log("success");
+    await pool.query("UPDATE rooms SET last_message = $1 WHERE room_id = $2", [content, room_id])
+    console.log("success");
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "An error occured while sending message" });
@@ -330,7 +330,7 @@ app.get("/getMessages/:roomID", async (req, res) => {
     "SELECT * FROM messages WHERE room_id = $1 ORDER BY created_at ASC",[roomID]
   );
   console.log("ppppppppppppppppppppppp",chat.rows);
-  res.status(200).json({ roomID });
+  res.status(200).json(chat.rows);
 });
 
 // chat
