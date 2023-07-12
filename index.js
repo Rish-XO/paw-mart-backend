@@ -326,10 +326,10 @@ app.get("/getAllChats", async (req, res) => {
 //get a chat
 app.get("/getMessages/:roomID", async (req, res) => {
   const roomID = req.params.roomID;
-  const chatRooms = await pool.query(
-    "SELECT * FROM rooms WHERE last_message IS NOT NULL"
+  const chat = await pool.query(
+    "SELECT * FROM messages WHERE room_id = $1 ORDER BY created_at ASC",[roomID]
   );
-  console.log(chatRooms.rows);
+  console.log("ppppppppppppppppppppppp",chat.rows);
   res.status(200).json({ roomID });
 });
 
