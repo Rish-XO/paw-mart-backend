@@ -329,7 +329,6 @@ io.on("connection", (socket) => {
     console.log("the current room", currentRoom);
     const clients = io.sockets.adapter.rooms.get(roomID);
     console.log(clients, "cccccccccccccccccccccccccccccc");
-   
   });
 
   socket.on("chatMessage", ({ roomID, message }) => {
@@ -337,7 +336,7 @@ io.on("connection", (socket) => {
     io.to(roomID).emit("chatMessage", message);
   });
 
-  socket.on("disconnect", () => {
+  socket.on("leaveRoom", () => {
     if (currentRoom) {
       socket.leave(currentRoom);
     }
