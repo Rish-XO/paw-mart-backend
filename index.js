@@ -269,7 +269,7 @@ app.post("/saveMessage", async (req, res) => {
     );
     
     // updating the lst msg in room table
-    await pool.query("UPDATE rooms SET last_message = $1 WHERE room_id = $2", [content, room_id])
+    await pool.query("UPDATE rooms SET last_message = $1, last_time = $2 WHERE room_id = $3", [content,created_at, room_id])
     console.log("success");
   } catch (error) {
     console.log(error.message);
