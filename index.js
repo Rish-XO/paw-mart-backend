@@ -270,7 +270,7 @@ app.post("/saveMessage", async (req, res) => {
     
     // updating the lst msg in room table
     await pool.query("UPDATE rooms SET last_message = $1 WHERE room_id = $2", [content, roomID])
-    console.log("success");
+    // console.log("success");
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "An error occured while sending message" });
@@ -324,7 +324,7 @@ app.get("/getAllChats", async (req, res) => {
 });
 
 //get a chat
-app.get("/getChatDetails/:roomID", async (req, res) => {
+app.get("/getMessages/:roomID", async (req, res) => {
   const roomID = req.params.roomID;
   const chatRooms = await pool.query(
     "SELECT * FROM rooms WHERE last_message IS NOT NULL"
