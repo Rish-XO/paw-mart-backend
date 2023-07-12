@@ -262,10 +262,15 @@ app.post("/roomId", async (req, res) => {
 app.post("/saveMessage", async (req, res) => {
   const { content, userID, roomID, time } = req.body;
   try {
+    // saving the message to table
     await pool.query(
-      "INSERT INTO messages (room_id, user_id,content, created_at) VALUES ($1,$2,$3,$4)",
+      "INSERT INTO messages (room_id, user_id, content, created_at) VALUES ($1,$2,$3,$4)",
       [roomID, userID, content, time]
     );
+    
+    // updating the lst msg in room table
+    await pool.query("UPDATE rooms SET last_message = $1 WHERE room_id = $2", [content, roomID])
+    console.log("success");
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "An error occured while sending message" });
@@ -297,7 +302,7 @@ app.get("/getAllChats", async (req, res) => {
       FROM image
       GROUP BY post_id
     ) image ON rooms.post_id = image.post_id
-   
+     WHERE rooms.last_message IS NOT NULL
     GROUP BY rooms.room_id, 
              posts.post_id, 
              users1.user_id,
@@ -309,7 +314,7 @@ app.get("/getAllChats", async (req, res) => {
              image.url
   `);
 
-    // WHERE rooms.last_message IS NOT NULL
+    
     // console.log(chatRooms.rows);
     res.status(200).json(chatRooms.rows);
   } catch (error) {
@@ -346,7 +351,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("chatMessage", ({ roomID, message }) => {
-    console.log(roomID, message, "*****************************s");
+    // console.log(roomID, message, "*****************************s");
     io.to(roomID).emit("chatMessage", message);
   });
 
