@@ -11,6 +11,7 @@ const multer = require("multer");
 const AWS = require("aws-sdk");
 const multerS3 = require("multer-s3");
 const { Socket } = require("socket.io");
+const moment = require('moment')
 
 const io = require("socket.io")(3001, {
   cors: {
@@ -267,9 +268,12 @@ app.post("/saveMessage", async (req, res) => {
       "INSERT INTO messages (room_id, user_id, content, created_at) VALUES ($1,$2,$3,$4)",
       [room_id, user_id, content, created_at]
     );
-    
+
     // updating the lst msg in room table
-    await pool.query("UPDATE rooms SET last_message = $1, last_time = $2 WHERE room_id = $3", [content,created_at, room_id])
+    await pool.query(
+      "UPDATE rooms SET last_message = $1, last_time = $2 WHERE room_id = $3",
+      [content, created_at, room_id]
+    );
     console.log("success");
   } catch (error) {
     console.log(error.message);
@@ -314,9 +318,13 @@ app.get("/getAllChats", async (req, res) => {
              image.url
   `);
 
-    
-    // console.log(chatRooms.rows);
-    res.status(200).json(chatRooms.rows);
+  const sortedChatRooms = chatRooms.rows.sort((a, b) => {
+    const dateA = moment(a.last_time);
+    const dateB = moment(b.last_time);
+    return dateB.diff(dateA);
+  });
+  // console.log(chatRooms.rows);
+    res.status(200).json(sortedChatRooms);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "server issue, try again" });
@@ -327,9 +335,10 @@ app.get("/getAllChats", async (req, res) => {
 app.get("/getMessages/:roomID", async (req, res) => {
   const roomID = req.params.roomID;
   const chat = await pool.query(
-    "SELECT * FROM messages WHERE room_id = $1 ORDER BY created_at ASC",[roomID]
+    "SELECT * FROM messages WHERE room_id = $1 ORDER BY created_at ASC",
+    [roomID]
   );
-  console.log("ppppppppppppppppppppppp",chat.rows);
+  console.log("ppppppppppppppppppppppp", chat.rows);
   res.status(200).json(chat.rows);
 });
 
