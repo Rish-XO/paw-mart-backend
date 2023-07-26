@@ -98,7 +98,7 @@ app.get("/posts", async (req, res) => {
 });
 
 // get a person's posts
-app.get("/posts/:id", async (req, res) => {
+app.get("/profile/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const query = `
@@ -109,10 +109,11 @@ app.get("/posts/:id", async (req, res) => {
     FROM image
     ORDER BY post_id, image_id
   ) AS image ON posts.post_id = image.post_id
-  WHERE posts.user_id = ${id}
+  WHERE posts.user_id = $1
 `;
- const result = await pool.query(query)
- console.log('rrrrrrrrrrrrrraaa'+result.rows[0]);
+ const result = await pool.query(query, [id])
+ console.log('rrrrrrrrrrrrrraaa'+result.rows);
+ res.json(result.rows)
   } catch (error) {
     console.log(error.message);
   }
