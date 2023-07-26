@@ -101,6 +101,7 @@ app.get("/posts", async (req, res) => {
 app.get("/posts/:id", async (req, res) => {
   const { user_id } = req.params;
   try {
+    
   } catch (error) {
     console.log(error.message);
   }
