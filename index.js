@@ -11,7 +11,7 @@ const multer = require("multer");
 const AWS = require("aws-sdk");
 const multerS3 = require("multer-s3");
 const { Socket } = require("socket.io");
-const moment = require('moment')
+const moment = require("moment");
 
 const io = require("socket.io")(3001, {
   cors: {
@@ -98,6 +98,13 @@ app.get("/posts", async (req, res) => {
 });
 
 // get a person's posts
+app.get("/posts/:id", async (req, res) => {
+  const { user_id } = req.params;
+  try {
+  } catch (error) {
+    console.log(error.message);
+  }
+});
 
 // get a post,
 app.get("/posts/:id", async (req, res) => {
@@ -320,12 +327,12 @@ app.get("/getAllChats", async (req, res) => {
              image.url
   `);
 
-  const sortedChatRooms = chatRooms.rows.sort((a, b) => {
-    const dateA = moment(a.last_time);
-    const dateB = moment(b.last_time);
-    return dateB.diff(dateA);
-  });
-  // console.log(chatRooms.rows);
+    const sortedChatRooms = chatRooms.rows.sort((a, b) => {
+      const dateA = moment(a.last_time);
+      const dateB = moment(b.last_time);
+      return dateB.diff(dateA);
+    });
+    // console.log(chatRooms.rows);
     res.status(200).json(sortedChatRooms);
   } catch (error) {
     console.log(error.message);
