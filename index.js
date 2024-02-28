@@ -13,7 +13,7 @@ const multerS3 = require("multer-s3");
 const { Socket } = require("socket.io");
 const moment = require("moment");
 
-const io = require("socket.io")(3001, {
+const io = require("socket.io")(3001, { 
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
