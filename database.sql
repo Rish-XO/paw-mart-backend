@@ -1,14 +1,58 @@
--- creating posts table in pawmart table
-
-CREATE TABLE public.posts
+CREATE TABLE IF NOT EXISTS public.users
 (
- 
+    user_id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    firstname character varying COLLATE pg_catalog."default",
+    lastname character varying COLLATE pg_catalog."default",
+    email character varying COLLATE pg_catalog."default",
+    password character varying COLLATE pg_catalog."default",
+    role character varying COLLATE pg_catalog."default",
+    CONSTRAINT users_pkey PRIMARY KEY (user_id)
 )
-;
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.users
+    OWNER to postgres;
+
+
+    CREATE TABLE IF NOT EXISTS public.posts
+(
+    post_id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    category character varying COLLATE pg_catalog."default",
+    breed character varying COLLATE pg_catalog."default",
+    price character varying COLLATE pg_catalog."default",
+    description character varying COLLATE pg_catalog."default",
+    user_id uuid,
+    CONSTRAINT posts_pkey PRIMARY KEY (post_id),
+    CONSTRAINT user_id FOREIGN KEY (user_id)
+        REFERENCES public.users (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.posts
     OWNER to postgres;
 
+
+    CREATE TABLE IF NOT EXISTS public.image
+(
+    image_id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    url character varying COLLATE pg_catalog."default",
+    post_id uuid,
+    CONSTRAINT image_pkey PRIMARY KEY (image_id),
+    CONSTRAINT post_id FOREIGN KEY (post_id)
+        REFERENCES public.posts (post_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.image
+    OWNER to postgres;
 
 -- need to add last_message constraint
 CREATE TABLE public.rooms
